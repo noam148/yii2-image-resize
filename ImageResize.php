@@ -5,6 +5,7 @@ use Yii;
 use yii\helpers\Url;
 use yii\helpers\FileHelper;
 use yii\imagine\Image;
+use yii\base\Exception;
 use Imagine\Image\Box;
 use Imagine\Image\ManipulatorInterface;
 
@@ -33,18 +34,32 @@ class ImageResize
      * @return string
      * @throws FileNotFoundException
      */
-    public function generateImage($filePath, $width, $height, $mode = self::IMAGE_OUTBOUND, $quality = null, $chosenFileName = null)
+    public function generateImage($filePath, $width, $height, $mode = "outbound", $quality = null, $chosenFileName = null)
     {
 		$filePath = FileHelper::normalizePath(Yii::getAlias($filePath));
         if (!is_file($filePath)) {
             throw new FileNotFoundException("File $filePath doesn't exist");
         }
+		
+		//set resize mode
+		$resizeMode = null;
+		switch ($mode) {
+			case "outbound":
+				$resizeMode = ImageResize::IMAGE_OUTBOUND;
+				break;
+			case "inset":
+				$resizeMode = ImageResize::IMAGE_INSET;
+				break;
+			default:
+	            throw new Exception('generateImage $mode is not valid choose for "outbound" or "inset"');
+		}
+		
 		//create some vars
 		$cachePath = Yii::getAlias('@webroot/' . $this->cachePath);
 		//get fileinfo
 		$aFileInfo = pathinfo($filePath);
 		//set default filename
-		$sFileHash = md5($filePath . $width . $height . $mode . filemtime($filePath));
+		$sFileHash = md5($filePath . $width . $height . $resizeMode . filemtime($filePath));
 		$imageFileName = null;
 		//if $this->useFilename set to true? use seo friendly name
 		if($this->useFilename === true){
@@ -82,7 +97,7 @@ class ImageResize
 		//create image
         $box = new Box($width, $height);
         $image = Image::getImagine()->open($filePath);
-        $image = $image->thumbnail($box, $mode);
+        $image = $image->thumbnail($box, $resizeMode);
         
         $options = [
             'quality'=> $quality === null ? $this->imageQuality : $quality
@@ -101,7 +116,7 @@ class ImageResize
 	 * @param string $fileName (custome filename)
      * @return string
      */
-    public function getUrl($filePath, $width, $height, $mode = self::THUMBNAIL_OUTBOUND, $quality = null, $fileName = null)
+    public function getUrl($filePath, $width, $height, $mode = "outbound", $quality = null, $fileName = null)
     {	
 		//get original file 
 		$normalizePath = FileHelper::normalizePath(Yii::getAlias($filePath));

@@ -45,7 +45,7 @@ If you want to get a image url:
 /*
  * $sImageFilePath_id: (required) path to file
  * $width/$height: (required) width height of the image
- * $mode: ImageResize::IMAGE_OUTBOUND or ImageResize::IMAGE_INSET
+ * $mode: "outbound" or "inset" 
  * $$quality: (1 - 100)
  * $chosenFileName: if config -> components -> imageresize -> useFilename is true? its an option to give a custom name else use original file name
  */
