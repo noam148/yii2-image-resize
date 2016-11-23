@@ -1,0 +1,23 @@
+{
+    "name": "noam148/yii2-image-resize",
+    "description": "A Yii2 component for resizing images (on the fly)",
+    "keywords": ["yii2", "extension", "component", "image", "resize", "on-the-fly"],
+    "homepage": "https://github.com/noam148/yii2-image-resize",
+    "type": "yii2-extension",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Noam148",
+			"homepage": "https://github.com/noam148/"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*",
+		"yiisoft/yii2-imagine": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "noam148\\imageresize\\": ""
+        }
+    }
+}
