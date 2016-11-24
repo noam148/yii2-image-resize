@@ -18,8 +18,11 @@ class ImageResize
     public $cachePath = 'assets/images';
     /** @var int $cacheExpire */
     public $cacheExpire = 0;
+	/** @var int $imageQuality */
 	public $imageQuality = 50;
+	/** @var int $useFilename if true show filename in url */
 	public $useFilename = true;
+	/** @var int $absoluteUrl if true include domain in url */
 	public $absoluteUrl = false;
 
     /**
