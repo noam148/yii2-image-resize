@@ -15,7 +15,7 @@ php composer.phar require "noam148/yii2-image-resize" "dev-master"
 or add
 
 ```json
-"noam148/yii2-image-resize" : "dev-master"
+"noam148/yii2-image-resize" : "*"
 ```
 
 to the require section of your application's `composer.json` file.
