@@ -40,12 +40,12 @@ class ImageResize {
 	 * @param integer $quality (1 - 100 quality)
 	 * @param string $chosenFileName (custome filename)
 	 * @return string
-	 * @throws FileNotFoundException
+	 * @throws Exception
 	 */
 	public function generateImage($filePath, $width, $height, $mode = "outbound", $quality = null, $chosenFileName = null) {
 		$filePath = FileHelper::normalizePath(Yii::getAlias($filePath));
 		if (!is_file($filePath)) {
-			throw new FileNotFoundException("File $filePath doesn't exist");
+			throw new Exception("File $filePath doesn't exist");
 		}
 
 		//set resize mode
