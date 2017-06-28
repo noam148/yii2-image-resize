@@ -2,6 +2,8 @@
 
 namespace noam148\imageresize;
 
+use Imagine\Image\ImageInterface;
+use Imagine\Image\Point;
 use Yii;
 use yii\helpers\Url;
 use yii\helpers\FileHelper;
@@ -14,6 +16,13 @@ class ImageResize {
 
 	const IMAGE_OUTBOUND = ManipulatorInterface::THUMBNAIL_OUTBOUND;
 	const IMAGE_INSET = ManipulatorInterface::THUMBNAIL_INSET;
+	const IMAGE_CUSTOM = 'custom';
+
+	const CROP_CENTER = 'center';
+	const CROP_TOP = 'top';
+	const CROP_BOTTOM = 'bottom';
+	const CROP_LEFT = 'left';
+	const CROP_RIGHT = 'right';
 
 	/** @var string $cachePath path alias relative with webroot where the cache files are kept */
 	public $cachePath = 'assets/images';
@@ -50,6 +59,8 @@ class ImageResize {
 
 		//set resize mode
 		$resizeMode = null;
+		$horzMode = null;
+		$vertMode = null;
 		switch ($mode) {
 			case "outbound":
 				$resizeMode = ImageResize::IMAGE_OUTBOUND;
@@ -58,7 +69,18 @@ class ImageResize {
 				$resizeMode = ImageResize::IMAGE_INSET;
 				break;
 			default:
-				throw new Exception('generateImage $mode is not valid choose for "outbound" or "inset"');
+				$hv = explode(':', $mode);
+				if(count($hv) != 2)
+					throw new Exception("generateImage $mode is not valid choose for 'outbound', 'inset' or 'horz:vert'");
+
+				$resizeMode = self::IMAGE_CUSTOM;
+				list($horzMode, $vertMode) = $hv;
+
+				if(!in_array($horzMode, [self::CROP_LEFT, self::CROP_CENTER, self::CROP_RIGHT]))
+					throw new Exception("generateImage $horzMode is not valid choose for 'left', 'center' or 'right'");
+				if(!in_array($vertMode, [self::CROP_TOP, self::CROP_CENTER, self::CROP_BOTTOM]))
+					throw new Exception("generateImage $vertMode is not valid choose for 'top', 'center' or 'bottom'");
+				break;
 		}
 
 		//create some vars
@@ -66,7 +88,7 @@ class ImageResize {
 		//get fileinfo
 		$aFileInfo = pathinfo($filePath);
 		//set default filename
-		$sFileHash = md5($filePath . $width . $height . $resizeMode . filemtime($filePath));
+		$sFileHash = md5($filePath . $width . $height . $mode . filemtime($filePath));
 		$imageFileName = null;
 		//if $this->useFilename set to true? use seo friendly name
 		if ($this->useFilename === true) {
@@ -104,7 +126,12 @@ class ImageResize {
 		//create image
 		$box = new Box($width, $height);
 		$image = Image::getImagine()->open($filePath);
-		$image = $image->thumbnail($box, $resizeMode);
+		if($resizeMode == self::IMAGE_CUSTOM) {
+			$cropRect = $this->getCropRectangle($image, $box, $horzMode, $vertMode);
+			$image = $image->crop(new Point($cropRect[0], $cropRect[1]), new Box($cropRect[2], $cropRect[3]))->resize($box);
+		} else {
+			$image = $image->thumbnail($box, $resizeMode);
+		}
 
 		$options = [
 			'quality' => $quality === null ? $this->imageQuality : $quality
@@ -151,6 +178,55 @@ class ImageResize {
 		FileHelper::removeDirectory($cachePath);
 		//creat dir
 		return FileHelper::createDirectory($cachePath, 0755);
+	}
+
+	/**
+	 * Get crop rectangle for custom thumbnail mode
+	 *
+	 * @param ImageInterface $image
+	 * @param Box $targetBox
+	 * @param string $horzMode
+	 * @param string $vertMode
+	 * @return int[]
+	 */
+	private function getCropRectangle($image, $targetBox, $horzMode, $vertMode)
+	{
+		$imageBox = $image->getSize();
+		$kw = $imageBox->getWidth() / $targetBox->getWidth();
+		$kh = $imageBox->getHeight() / $targetBox->getHeight();
+		$x = $y = $w = $h = 0;
+		if($kh > $kw) {
+			$x = 0;
+			$w = $imageBox->getWidth();
+			$h = $targetBox->getHeight() * $kw;
+			switch ($vertMode) {
+				case self::CROP_TOP:
+					$y = 0;
+					break;
+				case self::CROP_BOTTOM:
+					$y = $imageBox->getHeight() - $h;
+					break;
+				case self::CROP_CENTER:
+					$y = ($imageBox->getHeight() - $h) / 2;
+					break;
+			}
+		} else {
+			$y = 0;
+			$h = $imageBox->getHeight();
+			$w  = $targetBox->getWidth() * $kh;
+			switch ($horzMode) {
+				case self::CROP_LEFT:
+					$x = 0;
+					break;
+				case self::CROP_RIGHT:
+					$x = $imageBox->getWidth() - $w;
+					break;
+				case self::CROP_CENTER:
+					$x = ($imageBox->getWidth() - $w) / 2;
+					break;
+			}
+		}
+		return [$x, $y, $w, $h];
 	}
 
 }
