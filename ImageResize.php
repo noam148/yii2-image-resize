@@ -25,13 +25,13 @@ class ImageResize {
 	const CROP_RIGHT = 'right';
 
 	/** @var string $cachePath path alias relative with webroot where the cache files are kept */
-	public $cachePath = 'assets/images';
+	public $cachePath = ['assets/images'];
 
 	/** @var int $cacheExpire */
 	public $cacheExpire = 0;
 
 	/** @var int $imageQuality */
-	public $imageQuality = 50;
+	public $imageQuality = 80;
 
 	/** @var int $useFilename if true show filename in url */
 	public $useFilename = true;
@@ -84,7 +84,6 @@ class ImageResize {
 		}
 
 		//create some vars
-		$cachePath = Yii::getAlias('@webroot/' . $this->cachePath);
 		//get fileinfo
 		$aFileInfo = pathinfo($filePath);
 		//set default filename
@@ -109,35 +108,48 @@ class ImageResize {
 		}
 
 		$imageFileExt = "." . $aFileInfo['extension'];
-		$imageFilePath = $cachePath . DIRECTORY_SEPARATOR . substr($imageFileName, 0, 2);
-		$imageFile = $imageFilePath . DIRECTORY_SEPARATOR . $imageFileName . $imageFileExt;
+		$images = [];
+		foreach ($this->cachePath as $cachePath)
+		{
+			$cachePath     = Yii::getAlias('@webroot/' . $cachePath);
+			$imageFilePath = $cachePath . DIRECTORY_SEPARATOR . substr($imageFileName, 0, 2);
+			$imageFile     = $imageFilePath . DIRECTORY_SEPARATOR . $imageFileName . $imageFileExt;
 
-		if (file_exists($imageFile)) {
-			if ($this->cacheExpire !== 0 && (time() - filemtime($imageFile)) > $this->cacheExpire) {
-				unlink($imageFile);
-			} else {
-				return $imageFile;
+			if (file_exists($imageFile))
+			{
+				if ($this->cacheExpire !== 0 && (time() - filemtime($imageFile)) > $this->cacheExpire)
+				{
+					unlink($imageFile);
+				}
+				else
+				{
+					return $imageFile;
+				}
 			}
-		}
-		//if dir not exist create cache edir
-		if (!is_dir($imageFilePath)) {
-			FileHelper::createDirectory($imageFilePath, 0755);
-		}
-		//create image
-		$box = new Box($width, $height);
-		$image = Image::getImagine()->open($filePath);
-		if($resizeMode == self::IMAGE_CUSTOM) {
-			$cropRect = $this->getCropRectangle($image, $box, $horzMode, $vertMode);
-			$image = $image->crop(new Point($cropRect[0], $cropRect[1]), new Box($cropRect[2], $cropRect[3]))->resize($box);
-		} else {
-			$image = $image->thumbnail($box, $resizeMode);
+			//if dir not exist create cache edir
+			if (!is_dir($imageFilePath))
+			{
+				FileHelper::createDirectory($imageFilePath, 0755);
+			}
+      
+      //create image
+      $box = new Box($width, $height);
+      $image = Image::getImagine()->open($filePath);
+      if($resizeMode == self::IMAGE_CUSTOM) {
+        $cropRect = $this->getCropRectangle($image, $box, $horzMode, $vertMode);
+        $image = $image->crop(new Point($cropRect[0], $cropRect[1]), new Box($cropRect[2], $cropRect[3]))->resize($box);
+      } else {
+        $image = $image->thumbnail($box, $resizeMode);
+      }
+
+			$options = [
+				'quality' => $quality === null ? $this->imageQuality : $quality
+			];
+			$image->save($imageFile, $options);
+			$images[] = $imageFile;
 		}
 
-		$options = [
-			'quality' => $quality === null ? $this->imageQuality : $quality
-		];
-		$image->save($imageFile, $options);
-		return $imageFile;
+		return $images[0];
 	}
 
 	/**
@@ -155,16 +167,23 @@ class ImageResize {
 		//get original file 
 		$normalizePath = FileHelper::normalizePath(Yii::getAlias($filePath));
 		//get cache url
-		$cacheUrl = Yii::getAlias($this->cachePath);
-		//generate file
-		$resizedFilePath = self::generateImage($normalizePath, $width, $height, $mode, $quality, $fileName);
-		//get resized file
-		$normalizeResizedFilePath = FileHelper::normalizePath($resizedFilePath);
-		$resizedFileName = pathinfo($normalizeResizedFilePath, PATHINFO_BASENAME);
-		//get url
-		$sFileUrl = Url::to('@web/' . $cacheUrl . '/' . substr($resizedFileName, 0, 2) . '/' . $resizedFileName, $this->absoluteUrl);
-		//return path
-		return $sFileUrl;
+		$filesUrls = [];
+		foreach ($this->cachePath as $cachePath)
+		{
+			$cacheUrl = Yii::getAlias($cachePath);
+			//generate file
+			$resizedFilePath = self::generateImage($normalizePath, $width, $height, $mode, $quality, $fileName);
+			//get resized file
+			$normalizeResizedFilePath = FileHelper::normalizePath($resizedFilePath);
+			$resizedFileName          = pathinfo($normalizeResizedFilePath, PATHINFO_BASENAME);
+			//get url
+			$sFileUrl = Url::to('@web/' . $cacheUrl . '/' . substr($resizedFileName, 0, 2) . '/' . $resizedFileName, $this->absoluteUrl);
+
+			//return path
+			$filesUrls[] = $sFileUrl;
+		}
+
+		return $filesUrls[0];
 	}
 
 	/**
