@@ -27,7 +27,7 @@ to the require section of your application's `composer.json` file.
     'imageresize' => [
 		'class' => 'noam148\imageresize\ImageResize',
 		//path relative web folder
-		'cachePath' => 'assets/images',
+		'cachePath' =>  ['assets/images', '../../frontend/web/assets/images'],
 		//use filename (seo friendly) for resized images else use a hash
 		'useFilename' => true,
 		//show full url (for example in case of a API)
