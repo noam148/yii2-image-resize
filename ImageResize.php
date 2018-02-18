@@ -24,7 +24,7 @@ class ImageResize {
 	const CROP_LEFT = 'left';
 	const CROP_RIGHT = 'right';
 
-	/** @var string $cachePath path alias relative with webroot where the cache files are kept */
+	/** @var array $cachePath path alias relative with webroot where the cache files are kept, use diffrent path  */
 	public $cachePath = ['assets/images'];
 
 	/** @var int $cacheExpire */
@@ -83,12 +83,13 @@ class ImageResize {
 				break;
 		}
 
-		//create some vars
 		//get fileinfo
 		$aFileInfo = pathinfo($filePath);
+
 		//set default filename
 		$sFileHash = md5($filePath . $width . $height . $mode . filemtime($filePath));
 		$imageFileName = null;
+
 		//if $this->useFilename set to true? use seo friendly name
 		if ($this->useFilename === true) {
 			//set hash and default name
