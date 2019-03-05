@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="69532666-6197-42ed-ba4a-27ad2dd3b45f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/ImageResize.php" beforeDir="false" afterPath="$PROJECT_DIR$/ImageResize.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/yii2-image-resize.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/yii2-image-resize.iml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -89,12 +89,20 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1551779781391</updated>
-      <workItem from="1551779784362" duration="1335000" />
+      <workItem from="1551779784362" duration="1668000" />
     </task>
+    <task id="LOCAL-00001" summary="замена noam">
+      <created>1551782521819</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1551782521819</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1335000" />
+    <option name="totallyTimeSpent" value="1668000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
@@ -123,6 +131,10 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="замена noam" />
+    <option name="LAST_COMMIT_MESSAGE" value="замена noam" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/ImageResize.php">
