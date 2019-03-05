@@ -1,6 +1,6 @@
 <?php
 
-namespace noam148\imageresize;
+namespace gromovfjodor\imageresize;
 
 use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
